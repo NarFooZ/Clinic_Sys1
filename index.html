@@ -7,71 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Readex+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-/* SETTINGS */
-function viewSettings() {
-  var user = currentUser || {};
-  document.getElementById("view").innerHTML =
-    '<div class="card">'+
-      '<div class="card-header"><h2><i class="fas fa-cog"></i> الإعدادات</h2></div>'+
-      '<div style="padding:24px 22px">'+
-        '<div class="card" style="border:1px solid var(--border);padding:22px;max-width:500px">'+
-          '<h3 style="display:flex;align-items:center;gap:10px;margin-bottom:18px;font-size:1rem"><i class="fas fa-key" style="color:var(--gold)"></i> تغيير كلمة المرور</h3>'+
-          '<div class="fg"><label><i class="fas fa-lock" style="margin-left:6px;color:var(--gold);font-size:.8rem"></i> كلمة المرور الحالية</label><input type="password" id="curPass" placeholder="كلمة المرور الحالية"></div>'+
-          '<div class="fg"><label><i class="fas fa-key" style="margin-left:6px;color:var(--gold);font-size:.8rem"></i> كلمة المرور الجديدة</label><input type="password" id="newPass" placeholder="6 أحرف على الأقل"></div>'+
-          '<div class="fg"><label><i class="fas fa-check-circle" style="margin-left:6px;color:var(--gold);font-size:.8rem"></i> تأكيد كلمة المرور الجديدة</label><input type="password" id="newPass2" placeholder="تأكيد كلمة المرور"></div>'+
-          '<button class="btn btn-gold" onclick="changeAdminPassword()" style="width:100%;margin-top:6px"><i class="fas fa-save" style="margin-left:6px"></i> حفظ التغييرات</button>'+
-        '</div>'+
-      '</div>'+
-    '</div>';
-}
-
-async function changeAdminPassword() {
-  var cur = document.getElementById("curPass").value;
-  var p1 = document.getElementById("newPass").value;
-  var p2 = document.getElementById("newPass2").value;
-  if(!cur||!p1||!p2) return showToast("يرجى ملء جميع الحقول","error");
-  if(p1!==p2) return showToast("كلمتا المرور غير متطابقتين","error");
-  if(p1.length<6) return showToast("كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل","error");
-  if(!currentUser) return showToast("يجب تسجيل الدخول أولاً","error");
-  
-  // Verify current password
-  var hash = await hashPassword(cur, currentUser.password_salt);
-  if(hash !== currentUser.password_hash) return showToast("كلمة المرور الحالية غير صحيحة","error");
-  
-  // Update to new password
-  var newSalt = randomSalt();
-  var newHash = await hashPassword(p1, newSalt);
-  var {error} = await db.from("users").update({password_hash:newHash,password_salt:newSalt}).eq("id",currentUser.id);
-  if(error) return showToast("خطأ: "+error.message,"error");
-  
-  currentUser.password_hash = newHash;
-  currentUser.password_salt = newSalt;
-  document.getElementById("curPass").value = "";
-  document.getElementById("newPass").value = "";
-  document.getElementById("newPass2").value = "";
-  showToast("تم تغيير كلمة المرور بنجاح");
-}
-
-function toggleAdminSidebar() {
-  var s = document.getElementById("app").querySelector(".sidebar");
-  var o = document.getElementById("sideOverlay");
-  s.classList.toggle("open");
-  o.classList.toggle("show");
-}
-
-// Close sidebar on nav click for mobile
-var origGoTo = goTo;
-goTo = function(v) {
-  var s = document.getElementById("app").querySelector(".sidebar");
-  if(s.classList.contains("open")) {
-    s.classList.remove("open");
-    document.getElementById("sideOverlay").classList.remove("show");
-  }
-  origGoTo(v);
-};
-
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root {
@@ -768,6 +704,73 @@ async function viewAudit() {
     "<div class=\"card\"><div class=\"card-header\"><h2><i class=\"fas fa-shield-alt\"></i> سجل العمليات (آخر 200)</h2><span class=\"text-muted\">"+logs.length+" عملية</span></div>"+
     "<div class=\"tbl-wrap\"><table class=\"dtbl\"><thead><tr><th>الإجراء</th><th>التفاصيل</th><th>المستخدم</th><th>التاريخ والوقت</th></tr></thead><tbody>"+rows+"</tbody></table></div></div>";
 }
+
+/* SETTINGS */
+function viewSettings() {
+  var user = currentUser || {};
+  document.getElementById("view").innerHTML =
+    '<div class="card">'+
+      '<div class="card-header"><h2><i class="fas fa-cog"></i> الإعدادات</h2></div>'+
+      '<div style="padding:24px 22px">'+
+        '<div class="card" style="border:1px solid var(--border);padding:22px;max-width:500px">'+
+          '<h3 style="display:flex;align-items:center;gap:10px;margin-bottom:18px;font-size:1rem"><i class="fas fa-key" style="color:var(--gold)"></i> تغيير كلمة المرور</h3>'+
+          '<div class="fg"><label><i class="fas fa-lock" style="margin-left:6px;color:var(--gold);font-size:.8rem"></i> كلمة المرور الحالية</label><input type="password" id="curPass" placeholder="كلمة المرور الحالية"></div>'+
+          '<div class="fg"><label><i class="fas fa-key" style="margin-left:6px;color:var(--gold);font-size:.8rem"></i> كلمة المرور الجديدة</label><input type="password" id="newPass" placeholder="6 أحرف على الأقل"></div>'+
+          '<div class="fg"><label><i class="fas fa-check-circle" style="margin-left:6px;color:var(--gold);font-size:.8rem"></i> تأكيد كلمة المرور الجديدة</label><input type="password" id="newPass2" placeholder="تأكيد كلمة المرور"></div>'+
+          '<button class="btn btn-gold" onclick="changeAdminPassword()" style="width:100%;margin-top:6px"><i class="fas fa-save" style="margin-left:6px"></i> حفظ التغييرات</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+}
+
+async function changeAdminPassword() {
+  var cur = document.getElementById("curPass").value;
+  var p1 = document.getElementById("newPass").value;
+  var p2 = document.getElementById("newPass2").value;
+  if(!cur||!p1||!p2) return showToast("يرجى ملء جميع الحقول","error");
+  if(p1!==p2) return showToast("كلمتا المرور غير متطابقتين","error");
+  if(p1.length<6) return showToast("كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل","error");
+  if(!currentUser) return showToast("يجب تسجيل الدخول أولاً","error");
+  
+  // Verify current password
+  var hash = await hashPassword(cur, currentUser.password_salt);
+  if(hash !== currentUser.password_hash) return showToast("كلمة المرور الحالية غير صحيحة","error");
+  
+  // Update to new password
+  var newSalt = randomSalt();
+  var newHash = await hashPassword(p1, newSalt);
+  var {error} = await db.from("users").update({password_hash:newHash,password_salt:newSalt}).eq("id",currentUser.id);
+  if(error) return showToast("خطأ: "+error.message,"error");
+  
+  currentUser.password_hash = newHash;
+  currentUser.password_salt = newSalt;
+  document.getElementById("curPass").value = "";
+  document.getElementById("newPass").value = "";
+  document.getElementById("newPass2").value = "";
+  showToast("تم تغيير كلمة المرور بنجاح");
+}
+
+function toggleAdminSidebar() {
+  var s = document.getElementById("app").querySelector(".sidebar");
+  var o = document.getElementById("sideOverlay");
+  s.classList.toggle("open");
+  o.classList.toggle("show");
+}
+
+// Close sidebar on nav click for mobile
+var origGoTo = goTo;
+goTo = function(v) {
+  var s = document.getElementById("app").querySelector(".sidebar");
+  if(s.classList.contains("open")) {
+    s.classList.remove("open");
+    document.getElementById("sideOverlay").classList.remove("show");
+  }
+  origGoTo(v);
+};
+
+
+
+undefined
 </script>
 </body>
 </html>
